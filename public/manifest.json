@@ -1,6 +1,13 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "name": "PassEncoder",
+  "short_name": "PassEncoder",
+  "version": "0.1.0",
+  "description": "This extension will let you transmogrify your weak, often times shared, password into more sophiscated and site-unique ones",
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["activeTab"],
+  "manifest_version": 2,
   "icons": [
     {
       "src": "favicon.ico",

@@ -1,24 +1,34 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
 
 class App extends Component {
+  state = {
+    password: "",
+    transmog: ""
+  };
+
+  handleChange = event => {
+    if (!event || !event.target) {
+      return;
+    }
+
+    let password = event.target.value;
+    this.setState({
+      password,
+      transmog: btoa(password)
+    });
+  };
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+          <input
+            type="text"
+            value={this.state.password}
+            onChange={this.handleChange}
+          />
+          <input type="text" value={this.state.transmog} readOnly={true} />
         </header>
       </div>
     );

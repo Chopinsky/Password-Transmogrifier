@@ -26,7 +26,8 @@ const styles = {
 class App extends Component {
   state = {
     password: "",
-    transmog: ""
+    transmog: "[Enter your password to start]",
+    entered: false
   };
 
   handleChange = event => {
@@ -37,7 +38,8 @@ class App extends Component {
     let password = event.target.value;
     this.setState({
       password,
-      transmog: btoa(password)
+      transmog: btoa(password),
+      entered: true
     });
   };
 
@@ -51,18 +53,7 @@ class App extends Component {
               color="textSecondary"
               gutterBottom
             >
-              Word of the Day
-            </Typography>
-            <Typography variant="h5" component="h2">
-              benevolent
-            </Typography>
-            <Typography className={styles.pos} color="textSecondary">
-              adjective
-            </Typography>
-            <Typography component="p">
-              well meaning and kindly.
-              <br />
-              {'"a benevolent smile"'}
+              Click button to copy the transformed password.
             </Typography>
             <Input
               type="text"

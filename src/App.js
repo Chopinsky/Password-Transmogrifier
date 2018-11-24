@@ -30,6 +30,12 @@ class App extends Component {
     entered: false
   };
 
+  textInput = null;
+
+  setTextInputRef = element => {
+    this.textInput = element;
+  };
+
   handleChange = event => {
     if (!event || !event.target) {
       return;
@@ -41,6 +47,14 @@ class App extends Component {
       transmog: btoa(password),
       entered: true
     });
+  };
+
+  handleButtonClick = event => {
+    if (this.state.entered && this.textInput) {
+      this.textInput.select();
+      document.execCommand("copy");
+      alert(`Text copied: ${this.state.transmog}`);
+    }
   };
 
   render() {
@@ -63,10 +77,18 @@ class App extends Component {
             />
           </CardContent>
           <CardActions>
-            <Button size="medium">{this.state.transmog}</Button>
+            <Button size="medium" onClick={this.handleButtonClick}>
+              {this.state.transmog}
+            </Button>
+            <input
+              type="text"
+              ref={this.setTextInputRef}
+              value={this.state.transmog}
+              readOnly={true}
+              onClick={this.handleButtonClick}
+            />
           </CardActions>
         </Card>
-        <input type="text" value={this.state.transmog} readOnly={true} />
       </div>
     );
   }

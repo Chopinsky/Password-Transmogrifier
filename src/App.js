@@ -1,33 +1,33 @@
 import React, { Component } from "react";
-import icon from "./logo.png";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Input from "@material-ui/core/Input";
-import bcrypt from "bcrypt";
+import icon from "./logo.png";
+import hash from "hash.js";
 
 const styles = {
-  card: {
-    minWidth: 275
+  root: {
+    flexGrow: 1,
+    maxWidth: 300,
+    padding: 50
   },
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)"
+  wrapper: {
+    maxWidth: 250
   },
-  title: {
-    fontSize: 14
-  },
-  pos: {
-    marginBottom: 12
+  paper: {
+    margin: 50,
+    padding: 100
   },
   icon: {
     display: "block",
     margin: "auto",
-    height: "150px",
-    width: "150px"
+    width: 64,
+    height: 64
+  },
+  title: {
+    fontSize: 14
   }
 };
 
@@ -50,15 +50,24 @@ class App extends Component {
     }
 
     let password = event.target.value;
+    let newHash = hash
+      .sha256()
+      .update(password)
+      .digest("hex");
 
-    bcrypt.hash(password, 5, (err, hash) => {
-      if (!err) {
-        this.setState({
-          password,
-          hash,
-          entered: true
-        });
+    let result = "";
+    for (let i = 0; i < newHash.length; i++) {
+      if (i > 0 && i !== newHash.length - 1 && (i + 1) % 4 === 0) {
+        result += newHash.charAt(i) + "-";
+      } else {
+        result += newHash.charAt(i);
       }
+    }
+
+    this.setState({
+      password,
+      hash: result,
+      entered: true
     });
   };
 
@@ -72,37 +81,41 @@ class App extends Component {
 
   render() {
     return (
-      <div>
-        <img src={icon} style={styles.icon} alt="icon" />
-        <Card className={styles.card}>
-          <CardContent>
-            <Typography
-              className={styles.title}
-              color="textSecondary"
-              gutterBottom
-            >
-              Click button to copy the transformed password.
-            </Typography>
-            <Input
-              type="text"
-              title="Enter your ordinary password"
-              value={this.state.password}
-              onChange={this.handleChange}
-            />
-          </CardContent>
-          <CardActions>
-            <Button size="medium" onClick={this.handleButtonClick}>
-              {this.state.hash}
-            </Button>
-            <input
-              type="text"
-              ref={this.setTextInputRef}
-              value={this.state.hash}
-              readOnly={true}
-              onClick={this.handleButtonClick}
-            />
-          </CardActions>
-        </Card>
+      <div className={styles.root}>
+        <div className={styles.wrapper}>
+          <Paper className={styles.paper}>
+            <Grid container wrap="nowrap" spacing={16}>
+              <Grid item>
+                <img src={icon} style={styles.icon} alt="icon" />
+              </Grid>
+              <Grid item xs zeroMinWidth>
+                <Typography
+                  className={styles.title}
+                  color="textSecondary"
+                  gutterBottom
+                >
+                  Click button to copy the transformed password.
+                </Typography>
+                <Input
+                  type="text"
+                  title="Enter your ordinary password"
+                  value={this.state.password}
+                  onChange={this.handleChange}
+                />
+                <Button size="medium" onClick={this.handleButtonClick}>
+                  {this.state.hash}
+                </Button>
+                <input
+                  type="text"
+                  ref={this.setTextInputRef}
+                  value={this.state.hash}
+                  readOnly={true}
+                  onClick={this.handleButtonClick}
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+        </div>
       </div>
     );
   }

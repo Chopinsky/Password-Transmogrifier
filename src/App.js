@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import Input from "@material-ui/core/Input";
 import icon from "./logo.png";
@@ -41,10 +40,12 @@ class App extends Component {
     }
 
     let password = event.target.value;
-    let newHash = hash
-      .sha256()
-      .update(password)
-      .digest("hex");
+    let newHash = btoa(
+      hash
+        .sha256()
+        .update(password)
+        .digest("hex")
+    );
 
     let result = "";
     for (let i = 0; i < newHash.length; i++) {

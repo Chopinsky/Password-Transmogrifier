@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
@@ -7,29 +8,19 @@ import Input from "@material-ui/core/Input";
 import icon from "./logo.png";
 import hash from "hash.js";
 
-const styles = {
+const styles = theme => ({
   root: {
-    flexGrow: 1,
-    maxWidth: 300,
-    padding: 50
-  },
-  wrapper: {
-    maxWidth: 250
-  },
-  paper: {
-    margin: 50,
-    padding: 100
+    ...theme.mixins.gutters(),
+    paddingTop: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   icon: {
     display: "block",
     margin: "auto",
     width: 64,
     height: 64
-  },
-  title: {
-    fontSize: 14
   }
-};
+});
 
 class App extends Component {
   state = {
@@ -80,45 +71,45 @@ class App extends Component {
   };
 
   render() {
+    const { classes } = this.props;
+
     return (
-      <div className={styles.root}>
-        <div className={styles.wrapper}>
-          <Paper className={styles.paper}>
-            <Grid container wrap="nowrap" spacing={16}>
-              <Grid item>
-                <img src={icon} style={styles.icon} alt="icon" />
-              </Grid>
-              <Grid item xs zeroMinWidth>
-                <Typography
-                  className={styles.title}
-                  color="textSecondary"
-                  gutterBottom
-                >
-                  Click button to copy the transformed password.
-                </Typography>
-                <Input
-                  type="text"
-                  title="Enter your ordinary password"
-                  value={this.state.password}
-                  onChange={this.handleChange}
-                />
-                <Button size="medium" onClick={this.handleButtonClick}>
-                  {this.state.hash}
-                </Button>
-                <input
-                  type="text"
-                  ref={this.setTextInputRef}
-                  value={this.state.hash}
-                  readOnly={true}
-                  onClick={this.handleButtonClick}
-                />
-              </Grid>
+      <div>
+        <Paper className={classes.root}>
+          <Grid container wrap="nowrap" spacing={16}>
+            <Grid item>
+              <img src={icon} className={classes.icon} alt="icon" />
             </Grid>
-          </Paper>
-        </div>
+            <Grid item xs zeroMinWidth>
+              <Typography
+                className={classes.title}
+                color="textSecondary"
+                gutterBottom
+              >
+                Click button to copy the transformed password.
+              </Typography>
+              <Input
+                type="text"
+                title="Enter your ordinary password"
+                value={this.state.password}
+                onChange={this.handleChange}
+              />
+              <Button size="medium" onClick={this.handleButtonClick}>
+                {this.state.hash}
+              </Button>
+              <input
+                type="text"
+                ref={this.setTextInputRef}
+                value={this.state.hash}
+                readOnly={true}
+                onClick={this.handleButtonClick}
+              />
+            </Grid>
+          </Grid>
+        </Paper>
       </div>
     );
   }
 }
 
-export default App;
+export default withStyles(styles)(App);

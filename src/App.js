@@ -3,7 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
-import Input from "@material-ui/core/Input";
+import TextField from "@material-ui/core/TextField";
 import icon from "./logo.png";
 import hash from "hash.js";
 
@@ -18,6 +18,11 @@ const styles = theme => ({
     margin: "auto",
     width: 64,
     height: 64
+  },
+  textField: {
+    width: 250,
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit
   }
 });
 
@@ -66,8 +71,11 @@ class App extends Component {
   handleButtonClick = event => {
     if (this.state.entered && this.textInput) {
       this.textInput.select();
+
       document.execCommand("copy");
-      alert(`Text copied: ${this.state.hash}`);
+      window.getSelection().removeAllRanges();
+
+      console.log(`Text copied: ${this.state.hash}`);
     }
   };
 
@@ -87,23 +95,33 @@ class App extends Component {
                 color="textSecondary"
                 gutterBottom
               >
-                Click button to copy the transformed password.
+                Click new password field to copy the encoded password to the
+                clipboard.
               </Typography>
-              <Input
-                type="text"
-                title="Enter your ordinary password"
+              <TextField
+                required
+                fullWidth
+                label="Master Password"
+                helperText="Enter your master password for encoding"
+                margin="normal"
+                variant="outlined"
                 value={this.state.password}
                 onChange={this.handleChange}
+                className={classes.textField}
               />
-              <Button size="medium" onClick={this.handleButtonClick}>
-                {this.state.hash}
-              </Button>
-              <input
-                type="text"
-                ref={this.setTextInputRef}
+              <br />
+              <TextField
+                multiline
+                fullWidth
+                rowsMax="6"
+                label="Encoded Result"
+                margin="normal"
+                variant="outlined"
+                inputRef={this.setTextInputRef}
                 value={this.state.hash}
                 readOnly={true}
                 onClick={this.handleButtonClick}
+                className={classes.textField}
               />
             </Grid>
           </Grid>

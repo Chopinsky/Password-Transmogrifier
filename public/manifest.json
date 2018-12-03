@@ -1,6 +1,6 @@
 {
-  "name": "PassEncoder",
-  "short_name": "PassEncoder",
+  "name": "PassMadeEasy",
+  "short_name": "PassMadeEasy",
   "version": "0.1.0",
   "description": "This extension will let you transmogrify your weak, often times shared, password into more sophiscated and site-unique ones",
   "browser_action": {

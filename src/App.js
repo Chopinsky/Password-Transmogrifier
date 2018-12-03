@@ -45,12 +45,12 @@ class App extends Component {
     }
 
     let password = event.target.value;
-    let newHash = btoa(
-      hash
-        .sha256()
-        .update(password)
-        .digest("hex")
-    );
+    let raw = hash
+      .sha256()
+      .update(password)
+      .digest();
+
+    let newHash = btoa(raw);
 
     let result = "";
     for (let i = 0; i < newHash.length; i++) {
@@ -63,7 +63,7 @@ class App extends Component {
 
     this.setState({
       password,
-      hash: result,
+      hash: raw,
       entered: true
     });
   };

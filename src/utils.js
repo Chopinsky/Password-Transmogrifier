@@ -1,10 +1,10 @@
-const hexToBytes = (hex, debug) => {
+const encodeHex = (hex, debug) => {
   if (!hex || typeof hex !== "string" || hex.length === 0) {
     return [0];
   }
 
   let buf = 0;
-  let result = [];
+  let result = "";
 
   hex.split("").forEach((char, idx) => {
     let hexNum = mapCharToByte(char.toUpperCase());
@@ -17,13 +17,14 @@ const hexToBytes = (hex, debug) => {
       case 1:
         let mod = Math.floor(hexNum / 4);
         buf += mod;
-        result.push(buf);
-        buf = hexNum % 4;
+        result += mapEncodeToChar(buf);
+
+        buf = (hexNum % 4) * 4;
         break;
 
       case 2:
         buf += hexNum;
-        result.push(buf);
+        result += mapEncodeToChar(buf);
         buf = 0;
         break;
 
@@ -34,7 +35,7 @@ const hexToBytes = (hex, debug) => {
   });
 
   if (buf !== 0) {
-    result.push(buf);
+    result += mapEncodeToChar(buf);
   }
 
   return result;
@@ -50,6 +51,24 @@ const mapCharToByte = char => {
   }
 };
 
+const mapEncodeToChar = encode => {
+  if (typeof encode !== "number" || encode < 0 || encode > 63) {
+    return "";
+  }
+
+  if (encode === 62) {
+    return "+";
+  } else if (encode === 63) {
+    return "/";
+  } else if (encode <= 25 && encode >= 0) {
+    return String.fromCharCode(encode + 65);
+  } else if (encode <= 51 && encode >= 26) {
+    return String.fromCharCode(encode + 71);
+  } else {
+    return String.fromCharCode(encode - 4);
+  }
+};
+
 module.exports = {
-  hexToBytes
+  encodeHex
 };

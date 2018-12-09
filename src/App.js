@@ -4,23 +4,17 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import icon from "./logo.png";
 import hash from "hash.js";
 
 const styles = theme => ({
   root: {
     ...theme.mixins.gutters(),
+    backgroundColor: "white",
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2
   },
-  icon: {
-    display: "block",
-    margin: "auto",
-    width: 64,
-    height: 64
-  },
   textField: {
-    width: 250,
+    minWidth: 250,
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit
   }
@@ -29,7 +23,7 @@ const styles = theme => ({
 class App extends Component {
   state = {
     password: "",
-    hash: "[Enter your password to start]",
+    hash: "",
     entered: false
   };
 
@@ -48,7 +42,7 @@ class App extends Component {
     let raw = hash
       .sha256()
       .update(password)
-      .digest();
+      .digest("hex");
 
     let newHash = btoa(raw);
 
@@ -84,25 +78,23 @@ class App extends Component {
 
     return (
       <div>
-        <Paper className={classes.root}>
+        <Paper className={classes.root} elevation={1}>
           <Grid container wrap="nowrap" spacing={16}>
-            <Grid item>
-              <img src={icon} className={classes.icon} alt="icon" />
-            </Grid>
-            <Grid item xs zeroMinWidth>
+            <Grid item sm={3} />
+            <Grid item sm={6} zeroMinWidth>
               <Typography
                 className={classes.title}
                 color="textSecondary"
                 gutterBottom
               >
-                Click new password field to copy the encoded password to the
-                clipboard.
+                Click the generated password field to copy the encoded password
+                to the clipboard.
               </Typography>
               <TextField
                 required
                 fullWidth
-                label="Master Password"
-                helperText="Enter your master password for encoding"
+                label="Pass-Phrase"
+                helperText="The pass-phrase is case sensitive."
                 margin="normal"
                 variant="outlined"
                 value={this.state.password}
@@ -114,7 +106,8 @@ class App extends Component {
                 multiline
                 fullWidth
                 rowsMax="6"
-                label="Encoded Result"
+                label="Generated Password"
+                placeholder="Enter your pass-phrase to begin"
                 margin="normal"
                 variant="outlined"
                 inputRef={this.setTextInputRef}
@@ -124,6 +117,7 @@ class App extends Component {
                 className={classes.textField}
               />
             </Grid>
+            <Grid item sm={3} />
           </Grid>
         </Paper>
       </div>

@@ -1,41 +1,49 @@
 const encodeHex = (hex, debug) => {
-  if (!hex || typeof hex !== "string" || hex.length === 0) {
+  if (
+    !hex ||
+    (typeof hex !== "string" && !Array.isArray(hex)) ||
+    hex.length === 0
+  ) {
     return [0];
   }
 
   let buf = 0;
   let result = "";
 
-  hex.split("").forEach((char, idx) => {
-    let hexNum = mapCharToByte(char.toUpperCase());
+  if (Array.isArray(hex)) {
+    hex.forEach((char, idx) => {});
+  } else {
+    hex.split("").forEach((char, idx) => {
+      let hexNum = mapCharToByte(char.toUpperCase());
 
-    if (debug) {
-      console.log(`${char} -> ${hexNum}`);
+      if (debug) {
+        console.log(`${char} -> ${hexNum}`);
+      }
+
+      switch (idx % 3) {
+        case 1:
+          let mod = Math.floor(hexNum / 4);
+          buf += mod;
+          result += mapEncodeToChar(buf);
+
+          buf = (hexNum % 4) * 4;
+          break;
+
+        case 2:
+          buf += hexNum;
+          result += mapEncodeToChar(buf);
+          buf = 0;
+          break;
+
+        default:
+          buf = hexNum * 4;
+          break;
+      }
+    });
+
+    if (buf !== 0) {
+      result += mapEncodeToChar(buf);
     }
-
-    switch (idx % 3) {
-      case 1:
-        let mod = Math.floor(hexNum / 4);
-        buf += mod;
-        result += mapEncodeToChar(buf);
-
-        buf = (hexNum % 4) * 4;
-        break;
-
-      case 2:
-        buf += hexNum;
-        result += mapEncodeToChar(buf);
-        buf = 0;
-        break;
-
-      default:
-        buf = hexNum * 4;
-        break;
-    }
-  });
-
-  if (buf !== 0) {
-    result += mapEncodeToChar(buf);
   }
 
   return result;

@@ -5,6 +5,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import hash from "hash.js";
+import crypto from "crypto";
 
 const styles = theme => ({
   root: {
@@ -21,13 +22,15 @@ const styles = theme => ({
 });
 
 class App extends Component {
-  state = {
-    password: "",
-    hash: "",
-    entered: false
-  };
+  constructor(props) {
+    super(props);
 
-  textInput = null;
+    this.state = {
+      password: "",
+      hash: "",
+      entered: false
+    };
+  }
 
   setTextInputRef = element => {
     this.textInput = element;
@@ -39,6 +42,12 @@ class App extends Component {
     }
 
     let password = event.target.value;
+
+    //let crypto = require("crypto");
+    let mykey = crypto.createCipher("aes-128-cbc", "hashbrown-salt");
+    mykey.update(password, "utf8", "hex");
+    console.log(mykey.final("hex"));
+
     let raw = hash
       .sha256()
       .update(password)

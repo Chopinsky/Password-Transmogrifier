@@ -10,7 +10,8 @@ import crypto from "crypto";
 const styles = theme => ({
   root: {
     ...theme.mixins.gutters(),
-    backgroundColor: "white",
+    backgroundColor: "#FFFDE7",
+    margin: "10px 70px",
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2
   },
@@ -42,25 +43,28 @@ class App extends Component {
     }
 
     let password = event.target.value;
+    let raw = "";
 
-    //let crypto = require("crypto");
-    let mykey = crypto.createCipher("aes-128-cbc", "hashbrown-salt");
-    mykey.update(password, "utf8", "hex");
-    console.log(mykey.final("hex"));
+    if (password) {
+      //let crypto = require("crypto");
+      let mykey = crypto.createCipher("aes-128-cbc", "hashbrown-salt");
+      mykey.update(password, "utf8", "hex");
+      console.log(mykey.final("hex"));
 
-    let raw = hash
-      .sha256()
-      .update(password)
-      .digest("hex");
+      raw = hash
+        .sha256()
+        .update(password)
+        .digest("hex");
 
-    let newHash = btoa(raw);
+      let newHash = btoa(raw);
 
-    let result = "";
-    for (let i = 0; i < newHash.length; i++) {
-      if (i > 0 && i !== newHash.length - 1 && (i + 1) % 4 === 0) {
-        result += newHash.charAt(i) + "-";
-      } else {
-        result += newHash.charAt(i);
+      let result = "";
+      for (let i = 0; i < newHash.length; i++) {
+        if (i > 0 && i !== newHash.length - 1 && (i + 1) % 4 === 0) {
+          result += newHash.charAt(i) + "-";
+        } else {
+          result += newHash.charAt(i);
+        }
       }
     }
 
@@ -89,8 +93,8 @@ class App extends Component {
       <div>
         <Paper className={classes.root} elevation={1}>
           <Grid container wrap="nowrap" spacing={16}>
-            <Grid item sm={3} />
-            <Grid item sm={6} zeroMinWidth>
+            <Grid item sm={3} xs={1} zeroMinWidth />
+            <Grid item sm={6} xs={10}>
               <Typography
                 className={classes.title}
                 color="textSecondary"
@@ -114,7 +118,8 @@ class App extends Component {
               <TextField
                 multiline
                 fullWidth
-                rowsMax="6"
+                disabled={this.state.hash.length === 0}
+                rows="3"
                 label="Generated Password"
                 placeholder="Enter your pass-phrase to begin"
                 margin="normal"
@@ -126,7 +131,7 @@ class App extends Component {
                 className={classes.textField}
               />
             </Grid>
-            <Grid item sm={3} />
+            <Grid item sm={3} xs={1} zeroMinWidth />
           </Grid>
         </Paper>
       </div>

@@ -4,8 +4,10 @@ import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import hash from "hash.js";
-import crypto from "crypto";
+import Button from "@material-ui/core/Button";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
+import { getHash } from "./utils.js";
 
 const styles = theme => ({
   root: {
@@ -14,6 +16,17 @@ const styles = theme => ({
     margin: "10px 70px",
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2
+  },
+  title: {
+    marginTop: 10
+  },
+  button: {
+    margin: theme.spacing.unit,
+    width: "100%"
+  },
+  checkbox: {
+    marginLeft: theme.spacing.unit - 10,
+    width: "100%"
   },
   textField: {
     minWidth: 250,
@@ -29,7 +42,8 @@ class App extends Component {
     this.state = {
       password: "",
       hash: "",
-      entered: false
+      entered: false,
+      cacheHint: false
     };
   }
 
@@ -43,35 +57,31 @@ class App extends Component {
     }
 
     let password = event.target.value;
-    let raw = "";
+    let result = "";
 
     if (password) {
-      //let crypto = require("crypto");
-      let mykey = crypto.createCipher("aes-128-cbc", "hashbrown-salt");
-      mykey.update(password, "utf8", "hex");
-      console.log(mykey.final("hex"));
+      let raw = getHash(password);
 
-      raw = hash
-        .sha256()
-        .update(password)
-        .digest("hex");
-
-      let newHash = btoa(raw);
-
-      let result = "";
-      for (let i = 0; i < newHash.length; i++) {
-        if (i > 0 && i !== newHash.length - 1 && (i + 1) % 4 === 0) {
-          result += newHash.charAt(i) + "-";
+      for (let i = 0; i < raw.length; i++) {
+        if (i > 0 && i !== raw.length - 1 && (i + 1) % 4 === 0) {
+          result += raw.charAt(i) + "-";
         } else {
-          result += newHash.charAt(i);
+          result += raw.charAt(i);
         }
       }
     }
 
     this.setState({
       password,
-      hash: raw,
+      hash: result,
       entered: true
+    });
+  };
+
+  handleCheckboxClick = event => {
+    let toCache = !this.state.cacheHint;
+    this.setState({
+      cacheHint: toCache
     });
   };
 
@@ -96,25 +106,23 @@ class App extends Component {
             <Grid item sm={3} xs={1} zeroMinWidth />
             <Grid item sm={6} xs={10}>
               <Typography
+                align="center"
                 className={classes.title}
                 color="textSecondary"
-                gutterBottom
               >
-                Click the generated password field to copy the encoded password
-                to the clipboard.
+                Lorem more blah blah....
               </Typography>
               <TextField
                 required
                 fullWidth
-                label="Pass-Phrase"
-                helperText="The pass-phrase is case sensitive."
+                label="Pass Phrase"
+                helperText="* The pass phrase is case sensitive."
                 margin="normal"
                 variant="outlined"
                 value={this.state.password}
                 onChange={this.handleChange}
                 className={classes.textField}
               />
-              <br />
               <TextField
                 multiline
                 fullWidth
@@ -122,6 +130,8 @@ class App extends Component {
                 rows="3"
                 label="Generated Password"
                 placeholder="Enter your pass-phrase to begin"
+                helperText="* Click the generated password field to copy the encoded password
+                to the clipboard."
                 margin="normal"
                 variant="outlined"
                 inputRef={this.setTextInputRef}
@@ -129,6 +139,23 @@ class App extends Component {
                 readOnly={true}
                 onClick={this.handleButtonClick}
                 className={classes.textField}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.button}
+              >
+                Copy to clipboard
+              </Button>
+              <FormControlLabel
+                className={classes.checkbox}
+                label="Remember this Pass-Phrase next time"
+                control={
+                  <Checkbox
+                    checked={this.state.cacheHint}
+                    onChange={this.handleCheckboxClick}
+                  />
+                }
               />
             </Grid>
             <Grid item sm={3} xs={1} zeroMinWidth />

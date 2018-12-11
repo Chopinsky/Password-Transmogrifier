@@ -1,3 +1,21 @@
+const crypto = require("crypto");
+
+const getHash = (content, encode) => {
+  let ans = content;
+  if (crypto) {
+    const h = crypto.createHash("sha256");
+    h.update(content);
+
+    if (!encode) {
+      ans = h.digest().toString("base64");
+    } else {
+      ans = h.digest(encode);
+    }
+  }
+
+  return ans;
+};
+
 const encodeHex = (hex, debug) => {
   if (
     !hex ||
@@ -10,40 +28,36 @@ const encodeHex = (hex, debug) => {
   let buf = 0;
   let result = "";
 
-  if (Array.isArray(hex)) {
-    hex.forEach((char, idx) => {});
-  } else {
-    hex.split("").forEach((char, idx) => {
-      let hexNum = mapCharToByte(char.toUpperCase());
+  hex.split("").forEach((char, idx) => {
+    let hexNum = mapCharToByte(char.toUpperCase());
 
-      if (debug) {
-        console.log(`${char} -> ${hexNum}`);
-      }
-
-      switch (idx % 3) {
-        case 1:
-          let mod = Math.floor(hexNum / 4);
-          buf += mod;
-          result += mapEncodeToChar(buf);
-
-          buf = (hexNum % 4) * 4;
-          break;
-
-        case 2:
-          buf += hexNum;
-          result += mapEncodeToChar(buf);
-          buf = 0;
-          break;
-
-        default:
-          buf = hexNum * 4;
-          break;
-      }
-    });
-
-    if (buf !== 0) {
-      result += mapEncodeToChar(buf);
+    if (debug) {
+      console.log(`${char} -> ${hexNum}`);
     }
+
+    switch (idx % 3) {
+      case 1:
+        let mod = Math.floor(hexNum / 4);
+        buf += mod;
+        result += mapEncodeToChar(buf);
+
+        buf = (hexNum % 4) * 4;
+        break;
+
+      case 2:
+        buf += hexNum;
+        result += mapEncodeToChar(buf);
+        buf = 0;
+        break;
+
+      default:
+        buf = hexNum * 4;
+        break;
+    }
+  });
+
+  if (buf !== 0) {
+    result += mapEncodeToChar(buf);
   }
 
   return result;
@@ -52,7 +66,7 @@ const encodeHex = (hex, debug) => {
 const mapCharToByte = char => {
   if (char >= "0" && char <= "9") {
     return char - "0";
-  } else if (char >= "A" && char <= "F") {
+  } else if (char >= "a" && char <= "f") {
     return 10 + char.charCodeAt(0) - 65;
   } else {
     return 0;
@@ -78,5 +92,6 @@ const mapEncodeToChar = encode => {
 };
 
 module.exports = {
-  encodeHex
+  encodeHex,
+  getHash
 };

@@ -1,0 +1,26 @@
+{
+  "name": "pass_hasher",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "babel-build": "babel --presets es2015 popup.js -o ./build/popup.bundle.js",
+    "build": "webpack --config webpack.config.js"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^8.0.4",
+    "babel-preset-env": "^1.7.0",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
+  }
+}

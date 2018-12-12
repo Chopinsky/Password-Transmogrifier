@@ -1,3 +1,5 @@
+/*global chrome*/
+
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
@@ -47,13 +49,19 @@ class App extends Component {
     };
   }
 
-  setTextInputRef = element => {
+  setTextResultRef = element => {
     this.textInput = element;
   };
 
   handleChange = event => {
     if (!event || !event.target) {
       return;
+    }
+
+    if (chrome && chrome.tabs) {
+      chrome.tabs.getCurrent(tab => {
+        console.log(tab.url);
+      });
     }
 
     let password = event.target.value;
@@ -134,7 +142,7 @@ class App extends Component {
                 to the clipboard."
                 margin="normal"
                 variant="outlined"
-                inputRef={this.setTextInputRef}
+                inputRef={this.setTextResultRef}
                 value={this.state.hash}
                 readOnly={true}
                 onClick={this.handleButtonClick}

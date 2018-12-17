@@ -5,13 +5,23 @@
         <span class="card-title grey-text text-darken-2">Pass . Made . Easy</span>
       </div>
       <div class="row fieldRow">
-        <div class="input-field col s9">
-          <input id="hint" type="text" class="validate" v-model="input" v-on:keyup="onInputChanged">
+        <div class="input-field col s11">
+          <input
+            id="hint"
+            type="text"
+            class="validate"
+            v-model="input"
+            v-on:keydown="onInputChanged"
+          >
           <label for="hint">Hint Phrase</label>
         </div>
-        <div class="col s3">
-          <a class="waves-effect waves-teal btn-flat button">
-            <i class="material-icons left icon">cancel</i>Clear
+        <div class="col s1">
+          <a
+            class="waves-effect waves-teal btn-flat button"
+            title="Clear entrance"
+            v-on:click="onButtonClick"
+          >
+            <i class="material-icons left icon">cancel</i>
           </a>
         </div>
       </div>
@@ -38,6 +48,8 @@
 
 <script>
 /* eslint-disable */
+import crypto from "crypto";
+
 export default {
   name: "app",
   data: () => {
@@ -47,12 +59,42 @@ export default {
     };
   },
   methods: {
-    onInputChanged() {
-      if (this.input) {
-        this.password = this.input;
-      } else {
-        this.password = "";
+    hash(content, encode) {
+      let ans = content;
+      if (crypto) {
+        const h = crypto.createHash("sha256");
+        h.update(content);
+
+        if (!encode) {
+          ans = h.digest().toString("base64");
+        } else {
+          ans = h.digest(encode);
+        }
       }
+
+      console.log(ans);
+      return ans;
+    },
+    setPassword(password) {
+      this.password = password;
+
+      setTimeout(() => {
+        M.textareaAutoResize(this.$refs["textArea"]);
+      });
+    },
+    onInputChanged() {
+      this.$nextTick(() => {
+        // get input instantly
+        if (this.input) {
+          this.setPassword(this.hash(this.input));
+        } else {
+          this.setPassword("");
+        }
+      });
+    },
+    onButtonClick() {
+      this.input = "";
+      this.setPassword("");
     },
     onTextAreaFocus() {
       this.$refs["textArea"].select();
@@ -88,12 +130,13 @@ body {
   text-align: center;
   color: #2c3e50;
   background-image: linear-gradient(to right, #fff176, #f9a825);
+  width: 100%;
   min-width: 600px;
   overflow: visible;
 }
 .card-custom {
-  margin: 10px auto;
-  width: 100%;
+  margin: 15px auto;
+  width: 480px;
   max-width: 512px;
   min-width: 448px;
 }
@@ -101,15 +144,18 @@ body {
   padding: 0 20px;
 }
 .button {
-  margin-top: 18px;
-  width: 90px;
-  height: 40px;
-  padding: 0 4px 5px 7px;
-  border: #f9a825 solid 2px;
+  margin-top: 24px;
+  margin-left: -18px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+.button:hover {
+  background: silver;
 }
 i.icon {
   margin: 0;
   padding: 0;
-  width: 20px;
+  width: 36px;
 }
 </style>

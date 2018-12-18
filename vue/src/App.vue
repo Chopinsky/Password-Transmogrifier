@@ -29,10 +29,11 @@
         <div class="input-field col s12">
           <textarea
             id="password"
-            class="materialize-textarea"
+            class="materialize-textarea textarea"
             readonly="readOnly"
             ref="textArea"
             v-model="password"
+            v-bind:style="{ fontWeight: 'bold', color: '#1a237e' }"
             v-on:focus="onTextAreaFocus"
             v-on:blur="onTextAreaBlur"
           />
@@ -98,6 +99,11 @@ export default {
     },
     onTextAreaFocus() {
       this.$refs["textArea"].select();
+
+      if (this.password) {
+        document.execCommand("copy");
+        console.log(`Text copied: ${this.password}`);
+      }
     },
     onTextAreaBlur() {
       if (window.getSelection) {
@@ -157,5 +163,10 @@ i.icon {
   margin: 0;
   padding: 0;
   width: 36px;
+}
+.textarea::selection {
+  color: white;
+  background: #34495e;
+  text-shadow: 1px 1px 0 #27ae60;
 }
 </style>

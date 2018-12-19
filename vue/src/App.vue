@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="card medium card-custom">
     <div class="card-content">
-      <div class="row">
+      <div class="row title-row">
         <span class="card-title grey-text text-darken-2">Pass . Made . Easy</span>
       </div>
       <div class="row fieldRow">
@@ -40,8 +40,16 @@
           <label for="password" v-bind:class="isActive">Generated Password</label>
         </div>
       </div>
-      <div class="row">
-        <p>Message is: {{ input }}</p>
+      <div class="row button-row">
+        <a
+          class="waves-effect waves-light btn"
+          title="Copy the generated password to the clipboard"
+          v-bind:disabled="!this.input"
+          v-on:click="onCopyClick"
+        >
+          <i class="material-icons left">content_copy</i>
+          Copy to Clipboard
+        </a>
       </div>
     </div>
   </div>
@@ -54,6 +62,7 @@ import crypto from "crypto";
 export default {
   name: "app",
   data: () => {
+    //todo: load from chrome saved
     return {
       input: "",
       password: ""
@@ -83,6 +92,26 @@ export default {
         M.textareaAutoResize(this.$refs["textArea"]);
       });
     },
+    selectCopy() {
+      if (this.password && this.$refs["textArea"]) {
+        this.$refs["textArea"].select();
+        document.execCommand("copy");
+      }
+    },
+    unselect() {
+      if (window.getSelection && this.password) {
+        if (window.getSelection().empty) {
+          // Chrome
+          window.getSelection().empty();
+        } else if (window.getSelection().removeAllRanges) {
+          // Firefox
+          window.getSelection().removeAllRanges();
+        }
+      } else if (document.selection) {
+        // IE?
+        document.selection.empty();
+      }
+    },
     onInputChanged() {
       this.$nextTick(() => {
         // get input instantly
@@ -97,27 +126,15 @@ export default {
       this.input = "";
       this.setPassword("");
     },
+    onCopyClick() {
+      this.selectCopy();
+      this.unselect();
+    },
     onTextAreaFocus() {
-      this.$refs["textArea"].select();
-
-      if (this.password) {
-        document.execCommand("copy");
-        console.log(`Text copied: ${this.password}`);
-      }
+      this.selectCopy();
     },
     onTextAreaBlur() {
-      if (window.getSelection) {
-        if (window.getSelection().empty) {
-          // Chrome
-          window.getSelection().empty();
-        } else if (window.getSelection().removeAllRanges) {
-          // Firefox
-          window.getSelection().removeAllRanges();
-        }
-      } else if (document.selection) {
-        // IE?
-        document.selection.empty();
-      }
+      this.unselect();
     }
   },
   computed: {
@@ -139,6 +156,16 @@ body {
   width: 100%;
   min-width: 600px;
   overflow: visible;
+}
+div.row {
+  margin-bottom: 0px;
+  padding-top: 0px;
+}
+div.title-row {
+  padding: 20px 0 10px 0;
+}
+div.button-row {
+  padding: 5px;
 }
 .card-custom {
   margin: 15px auto;

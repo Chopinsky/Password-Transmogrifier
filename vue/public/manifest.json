@@ -7,6 +7,6 @@
     "default_popup": "index.html",
     "default_title": "Password made easy"
   },
-  "permissions": ["activeTab", "clipboardWrite", "storage"],
+  "permissions": ["activeTab", "storage", "clipboardWrite"],
   "manifest_version": 2
 }

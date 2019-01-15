@@ -68,23 +68,41 @@ import crypto from "crypto";
 
 const INPUT_KEY = "hintPhrase";
 const TO_SAVE_KEY = "savePassPhrase";
+const DEV_MODE = false;
 
 export default {
   name: "app",
   data: function() {
-    if (chrome && chrome.storage) {
-      input = chrome.storage.sync.get([INPUT_KEY, TO_SAVE_KEY], result => {
+    if (DEV_MODE && chrome && chrome.storage) {
+      chrome.storage.sync.get([INPUT_KEY, TO_SAVE_KEY], function(result) {
         if (result[TO_SAVE_KEY]) {
+          this.checked = true;
           this.input = result[INPUT_KEY];
-          this.checked = result[TO_SAVE_KEY];
           this.setPassword(this.hash(result[INPUT_KEY]));
 
           this.$refs["input"].focus();
         }
       });
+    } else if (typeof Storage !== "undefined") {
+      setTimeout(() => {
+        if (localStorage[TO_SAVE_KEY] && localStorage[INPUT_KEY]) {
+          this.checked = true;
+          this.input = localStorage[INPUT_KEY];
+          this.setPassword(this.hash(localStorage[INPUT_KEY]));
+
+          this.$refs["input"].focus();
+        }
+      }, 0);
+    }
+
+    let host = window.location.host || window.location.hostname;
+    let hostArray = host.split(".");
+    if (hostArray.length > 3) {
+      host = hostArray.slice(hostArray.length - 3).join(".");
     }
 
     return {
+      host,
       input: "",
       password: "",
       checked: false
@@ -96,6 +114,7 @@ export default {
       if (crypto) {
         const h = crypto.createHash("sha256");
         h.update(content);
+        h.update(this.host);
 
         if (!encode) {
           ans = h.digest().toString("base64");
@@ -133,9 +152,19 @@ export default {
         document.selection.empty();
       }
     },
-    store(key, value) {
-      if (chrome && chrome.storage) {
-        chrome.storage.sync.set({ key: value });
+    updateStore() {
+      if (DEV_MODE && chrome && chrome.storage) {
+        chrome.storage.sync.set({ key: value }, function() {
+          console.log(`Settings {${key}: ${value}} is saved`);
+        });
+      } else if (typeof Storage !== "undefined") {
+        if (this.checked) {
+          localStorage[INPUT_KEY] = this.input;
+          localStorage[TO_SAVE_KEY] = this.input ? true : false;
+        } else {
+          localStorage[INPUT_KEY] = "";
+          localStorage[TO_SAVE_KEY] = false;
+        }
       }
     },
     onInputChanged() {
@@ -146,20 +175,18 @@ export default {
         } else {
           this.setPassword("");
         }
+
+        this.updateStore();
       });
     },
     onButtonClick() {
       this.input = "";
       this.setPassword("");
+      this.updateStore();
     },
     onCheckboxClicked(event) {
-      if (chrome) {
-        if (this.checked && this.input) {
-          this.store(TO_SAVE_KEY, this.input);
-        } else {
-          this.store(TO_SAVE_KEY, "");
-        }
-      }
+      this.checked = !this.checked;
+      this.updateStore();
     },
     onCopyClick() {
       this.selectCopy();
@@ -189,7 +216,7 @@ body {
   color: #2c3e50;
   background-image: linear-gradient(to right, #fff176, #f9a825);
   width: 100%;
-  min-width: 600px;
+  min-width: 480px;
   overflow: visible;
 }
 div.row {
@@ -212,9 +239,9 @@ div.control-row {
 }
 .card-custom {
   margin: 15px auto;
-  width: 480px;
-  max-width: 512px;
-  min-width: 448px;
+  width: 360px;
+  max-width: 480px;
+  min-width: 320px;
 }
 .button {
   margin-top: 24px;

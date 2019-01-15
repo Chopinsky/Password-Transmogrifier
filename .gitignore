@@ -15,6 +15,7 @@
 /addon/build
 /vue/dist
 /.vscode
+dist.*
 
 # local env files
 .env.local

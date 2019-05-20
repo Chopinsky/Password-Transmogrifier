@@ -12,7 +12,7 @@
             ref="input"
             class="validate"
             v-model="input"
-            v-on:keydown="onInputChanged"
+            v-on:input="onInputChanged"
           >
           <label for="hint">Hint Phrase</label>
         </div>
@@ -64,8 +64,6 @@
 
 <script>
 /* eslint-disable */
-import crypto from "crypto";
-
 const INPUT_KEY = "hintPhrase";
 const TO_SAVE_KEY = "savePassPhrase";
 const DEV_MODE = false;
@@ -109,22 +107,6 @@ export default {
     };
   },
   methods: {
-    hash(content, encode) {
-      let ans = content;
-      if (crypto) {
-        const h = crypto.createHash("sha256");
-        h.update(content);
-        h.update(this.host);
-
-        if (!encode) {
-          ans = h.digest().toString("base64");
-        } else {
-          ans = h.digest(encode);
-        }
-      }
-
-      return ans;
-    },
     setPassword(password) {
       this.password = password;
 
@@ -167,17 +149,17 @@ export default {
         }
       }
     },
-    onInputChanged() {
-      this.$nextTick(() => {
-        // get input instantly
-        if (this.input) {
-          this.setPassword(this.hash(this.input));
-        } else {
-          this.setPassword("");
-        }
+    onInputChanged(event) {
+      const currInput = event.target.value;
 
-        this.updateStore();
-      });
+      if (this.input) {
+        let raw = this.$algo.hash(this.input, this.host);
+        this.setPassword(this.$algo.condense(raw));
+      } else {
+        this.setPassword("");
+      }
+
+      this.updateStore();
     },
     onButtonClick() {
       this.input = "";

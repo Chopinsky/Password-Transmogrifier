@@ -122,12 +122,14 @@ export default {
     },
     unselect() {
       if (window.getSelection && this.password) {
-        if (window.getSelection().empty) {
+        let selection = window.getSelection();
+
+        if (selection.empty) {
           // Chrome
-          window.getSelection().empty();
-        } else if (window.getSelection().removeAllRanges) {
+          selection.empty();
+        } else if (selection.removeAllRanges) {
           // Firefox
-          window.getSelection().removeAllRanges();
+          selection.removeAllRanges();
         }
       } else if (document.selection) {
         // IE?
@@ -161,7 +163,7 @@ export default {
 
       this.updateStore();
     },
-    onButtonClick() {
+    onButtonClick(event) {
       this.input = "";
       this.setPassword("");
       this.updateStore();
@@ -170,14 +172,14 @@ export default {
       this.checked = !this.checked;
       this.updateStore();
     },
-    onCopyClick() {
+    onCopyClick(event) {
       this.selectCopy();
       this.unselect();
     },
-    onTextAreaFocus() {
+    onTextAreaFocus(event) {
       this.selectCopy();
     },
-    onTextAreaBlur() {
+    onTextAreaBlur(event) {
       this.unselect();
     }
   },

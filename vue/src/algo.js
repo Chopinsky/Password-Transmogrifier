@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const DEFAULT_LENGTH = 12;
+const DEFAULT_LENGTH = 16;
 const MIN_CHAR_TYPE_COUNT = 2;
 
 const hash = (content, host, encode) => {
@@ -35,54 +35,43 @@ const condense = password => {
 
   for (let i = 0; i < password.length; i++) {
     let ch = password.charCodeAt(i);
-    if (
-      (!pos[0] || pos[0].length < MIN_CHAR_TYPE_COUNT) &&
-      ch >= 48 &&
-      ch <= 57
-    ) {
+
+    if (ch >= 48 && ch <= 57) {
       // a number
       if (!pos[0]) {
         pos[0] = [i];
-      } else {
+        doneCount++;
+      } else if (pos[0].length < MIN_CHAR_TYPE_COUNT) {
         pos[0].push(i);
+        doneCount++;
       }
-
-      doneCount++;
-    } else if (
-      (!pos[1] || pos[1].length < MIN_CHAR_TYPE_COUNT) &&
-      ch >= 65 &&
-      ch <= 90
-    ) {
+    } else if (ch >= 65 && ch <= 90) {
       // a upper case
       if (!pos[1]) {
-        pos[1] = i;
-      } else {
+        pos[1] = [i];
+        doneCount++;
+      } else if (pos[1].length < MIN_CHAR_TYPE_COUNT) {
         pos[1].push(i);
+        doneCount++;
       }
-
-      doneCount++;
-    } else if (
-      (!pos[2] || pos[2].length < MIN_CHAR_TYPE_COUNT) &&
-      ch >= 97 &&
-      ch <= 122
-    ) {
+    } else if (ch >= 97 && ch <= 122) {
       // a lower case
       if (!pos[2]) {
-        pos[2] = i;
-      } else {
+        pos[2] = [i];
+        doneCount++;
+      } else if (pos[2].length < MIN_CHAR_TYPE_COUNT) {
         pos[2].push(i);
+        doneCount++;
       }
-
-      doneCount++;
-    } else if (!pos[3] || pos[3].length < MIN_CHAR_TYPE_COUNT) {
+    } else {
       // a symbol
       if (!pos[3]) {
-        pos[3] = i;
-      } else {
+        pos[3] = [i];
+        doneCount++;
+      } else if (pos[3].length < MIN_CHAR_TYPE_COUNT) {
         pos[3].push(i);
+        doneCount++;
       }
-
-      doneCount++;
     }
 
     if (doneCount === 4 * MIN_CHAR_TYPE_COUNT) {
@@ -90,38 +79,74 @@ const condense = password => {
     }
   }
 
+  if (!pos[3] || pos[3].length === 0) {
+    // replace with symbols
+    let transform = -1;
+    for (let i = 1; i < 3; i++) {
+      if (pos[i] && pos[i].length > 1) {
+        transform = pos[i].pop();
+        break;
+      }
+    }
+
+    if (transform >= 0) {
+      let newChar = mapChar(password.charCodeAt(transform));
+      pos[3] = [transform];
+      password =
+        password.substring(0, transform) +
+        newChar +
+        password.substring(transform + 1);
+    }
+  }
+
   pos = pos.flat();
-  let fmt = new Array(DEFAULT_LENGTH);
+  let final = new Array(DEFAULT_LENGTH);
 
   for (let loc of pos) {
     let count = 0;
     let idx = loc;
 
     do {
+      // keep shifting to the next available pos for the
+      // chars
       idx = (loc + count++) % DEFAULT_LENGTH;
-    } while (fmt[idx]);
+    } while (final[idx]);
 
-    fmt[idx] = password.charAt(loc);
+    final[idx] = password.charAt(loc);
   }
 
   let lastCh = "";
   for (let i = 0; i < DEFAULT_LENGTH; i++) {
-    if (fmt[i]) {
+    if (final[i]) {
       continue;
     }
 
-    fmt[i] = password.charAt(i);
-    if (fmt[i] === lastCh) {
-      fmt[i] = password.charAt(DEFAULT_LENGTH - i - 1);
+    final[i] = password.charAt(i);
+    if (final[i] === lastCh) {
+      final[i] = password.charAt(DEFAULT_LENGTH - i - 1);
     }
 
-    lastCh = fmt[i];
+    lastCh = final[i];
   }
 
-  //TODO: before join, make sure we've at least 1 symbol
-  //      use existing char mapping to solve this.
+  return final.join("");
+};
 
-  return fmt.join("");
+const mapChar = charCode => {
+  let pos = charCode % 32;
+  let result = charCode;
+
+  if (pos < 15) {
+    result = pos + 33;
+  } else if (pos < 22) {
+    result = pos - 15 + 58;
+  } else if (pos < 28) {
+    result = pos - 22 + 91;
+  } else {
+    result = pos - 28 + 123;
+  }
+
+  return String.fromCharCode(result);
 };
 
 export default {

@@ -1,7 +1,9 @@
 import crypto from "crypto";
 
-const DEFAULT_LENGTH = 16;
+const DEFAULT_LENGTH = 10;
 const MIN_CHAR_TYPE_COUNT = 2;
+
+let outputSize = DEFAULT_LENGTH;
 
 const hash = (content, host, encode) => {
   let ans = content;
@@ -21,12 +23,18 @@ const hash = (content, host, encode) => {
   return ans;
 };
 
+const setOutputSize = size => {
+  if (size >= DEFAULT_LENGTH) {
+    outputSize = size;
+  }
+};
+
 const condense = password => {
   if (!password) {
     return "";
   }
 
-  if (password.length <= DEFAULT_LENGTH) {
+  if (password.length <= outputSize) {
     return password;
   }
 
@@ -100,7 +108,7 @@ const condense = password => {
   }
 
   pos = pos.flat();
-  let final = new Array(DEFAULT_LENGTH);
+  let final = new Array(outputSize);
 
   for (let loc of pos) {
     let count = 0;
@@ -109,21 +117,21 @@ const condense = password => {
     do {
       // keep shifting to the next available pos for the
       // chars
-      idx = (loc + count++) % DEFAULT_LENGTH;
+      idx = (loc + count++) % outputSize;
     } while (final[idx]);
 
     final[idx] = password.charAt(loc);
   }
 
   let lastCh = "";
-  for (let i = 0; i < DEFAULT_LENGTH; i++) {
+  for (let i = 0; i < outputSize; i++) {
     if (final[i]) {
       continue;
     }
 
     final[i] = password.charAt(i);
     if (final[i] === lastCh) {
-      final[i] = password.charAt(DEFAULT_LENGTH - i - 1);
+      final[i] = password.charAt(outputSize - i - 1);
     }
 
     lastCh = final[i];
@@ -153,7 +161,7 @@ export default {
   install: function(Vue) {
     // Do stuff
     Object.defineProperty(Vue.prototype, "$algo", {
-      value: { condense, hash }
+      value: { condense, hash, setOutputSize }
     });
   }
 };

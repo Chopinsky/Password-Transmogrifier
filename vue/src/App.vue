@@ -67,6 +67,7 @@
 const INPUT_KEY = "hintPhrase";
 const TO_SAVE_KEY = "savePassPhrase";
 const DEV_MODE = false;
+const DEFAULT_OUTPUT_LEN = 16;
 
 export default {
   name: "app",
@@ -98,6 +99,8 @@ export default {
     if (hostArray.length > 3) {
       host = hostArray.slice(hostArray.length - 3).join(".");
     }
+
+    this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
 
     return {
       host,
@@ -156,7 +159,7 @@ export default {
 
       if (this.input) {
         let raw = this.$algo.hash(this.input, this.host);
-        this.setPassword(this.$algo.condense(raw));
+        this.setPassword(this.$algo.condense(raw, DEFAULT_OUTPUT_LEN));
       } else {
         this.setPassword("");
       }

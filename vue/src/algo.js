@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const DEFAULT_LENGTH = 10;
+const DEFAULT_LENGTH = 12;
 const MIN_CHAR_TYPE_COUNT = 2;
 
 let outputSize = DEFAULT_LENGTH;

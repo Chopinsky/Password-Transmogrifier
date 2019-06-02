@@ -1,9 +1,10 @@
 <template>
-  <div id="app" class="card medium card-custom">
+  <div id="app" class="card large card-custom">
     <div class="card-content">
       <div class="row title-row">
         <span class="card-title grey-text text-darken-2">Pass . Made . Easy</span>
       </div>
+
       <div class="row field-row">
         <div class="input-field col s11">
           <input
@@ -26,12 +27,29 @@
           </a>
         </div>
       </div>
+
       <div class="row inline-row">
         <label class="checkbox">
           <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked">
           <span>Save this Hint Phrase</span>
         </label>
       </div>
+
+      <div class="row short-row">
+        <p class="range-field">
+          <input
+            type="range"
+            id="pass-len"
+            min="12"
+            max="32"
+            step="4"
+            value="16"
+            v-model="pasLen"
+            v-on:change="onRangeChanged"
+          >
+        </p>
+      </div>
+
       <div class="row field-row">
         <div class="input-field col s12">
           <textarea
@@ -47,6 +65,7 @@
           <label for="password" v-bind:class="isActive">Generated Password</label>
         </div>
       </div>
+
       <div class="row control-row">
         <a
           class="waves-effect waves-light btn"
@@ -64,40 +83,51 @@
 
 <script>
 /* eslint-disable */
-const INPUT_KEY = "hintPhrase";
-const TO_SAVE_KEY = "savePassPhrase";
+const INPUT_KEY = "INPUT_KEY";
+const TO_SAVE_KEY = "TO_SAVE_KEY";
+const PASSWORD_LEN = "PASSWORD_LEN";
 const DEV_MODE = false;
 const DEFAULT_OUTPUT_LEN = 16;
 
 export default {
   name: "app",
   data: function() {
+    let host = window.location.host || window.location.hostname;
+    let hostArray = host.split(".");
+    if (hostArray.length > 3) {
+      host = hostArray.slice(hostArray.length - 3).join(".");
+    }
+
     if (DEV_MODE && chrome && chrome.storage) {
       chrome.storage.sync.get([INPUT_KEY, TO_SAVE_KEY], function(result) {
         if (result[TO_SAVE_KEY]) {
           this.checked = true;
           this.input = result[INPUT_KEY];
-          this.setPassword(this.hash(result[INPUT_KEY]));
+          this.pasLen = result[PASSWORD_LEN] || DEFAULT_OUTPUT_LEN;
+          this.$algo.setOutputSize(this.pasLen);
+
+          if (this.input) {
+            this.setPassword(this.input, host);
+          }
 
           this.$refs["input"].focus();
         }
       });
-    } else if (typeof Storage !== "undefined") {
+    } else if (typeof localStorage !== "undefined") {
       setTimeout(() => {
         if (localStorage[TO_SAVE_KEY] && localStorage[INPUT_KEY]) {
           this.checked = true;
           this.input = localStorage[INPUT_KEY];
-          this.setPassword(this.hash(localStorage[INPUT_KEY]));
+          this.pasLen = localStorage[PASSWORD_LEN] || DEFAULT_OUTPUT_LEN;
+          this.$algo.setOutputSize(this.pasLen);
+
+          if (this.input) {
+            this.setPassword(this.input, host);
+          }
 
           this.$refs["input"].focus();
         }
       }, 0);
-    }
-
-    let host = window.location.host || window.location.hostname;
-    let hostArray = host.split(".");
-    if (hostArray.length > 3) {
-      host = hostArray.slice(hostArray.length - 3).join(".");
     }
 
     this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
@@ -106,12 +136,16 @@ export default {
       host,
       input: "",
       password: "",
+      pasLen: DEFAULT_OUTPUT_LEN,
       checked: false
     };
   },
   methods: {
-    setPassword(password) {
-      this.password = password;
+    setPassword(password, host) {
+      if (password) {
+        let raw = this.$algo.hash(password, host || this.host);
+        this.password = this.$algo.condense(raw);
+      }
 
       setTimeout(() => {
         M.textareaAutoResize(this.$refs["textArea"]);
@@ -139,15 +173,15 @@ export default {
         document.selection.empty();
       }
     },
-    updateStore() {
+    updateStore(val) {
       if (DEV_MODE && chrome && chrome.storage) {
-        chrome.storage.sync.set({ key: value }, function() {
+        chrome.storage.sync.set({ INPUT_KEY: val }, function() {
           console.log(`Settings {${key}: ${value}} is saved`);
         });
-      } else if (typeof Storage !== "undefined") {
+      } else if (typeof localStorage !== "undefined") {
         if (this.checked) {
-          localStorage[INPUT_KEY] = this.input;
-          localStorage[TO_SAVE_KEY] = this.input ? true : false;
+          localStorage[INPUT_KEY] = val;
+          localStorage[TO_SAVE_KEY] = val ? true : false;
         } else {
           localStorage[INPUT_KEY] = "";
           localStorage[TO_SAVE_KEY] = false;
@@ -157,24 +191,19 @@ export default {
     onInputChanged(event) {
       const currInput = event.target.value;
 
-      if (this.input) {
-        let raw = this.$algo.hash(this.input, this.host);
-        this.setPassword(this.$algo.condense(raw, DEFAULT_OUTPUT_LEN));
-      } else {
-        this.setPassword("");
-      }
-
-      this.updateStore();
+      this.setPassword(currInput);
+      this.updateStore(currInput);
     },
     onButtonClick(event) {
       this.input = "";
       this.setPassword("");
-      this.updateStore();
+      this.updateStore("");
     },
     onCheckboxClicked(event) {
       this.checked = !this.checked;
-      this.updateStore();
+      this.updateStore(this.input);
     },
+    onRangeChanged(event) {},
     onCopyClick(event) {
       this.selectCopy();
       this.unselect();
@@ -216,6 +245,9 @@ div.title-row {
 div.field-row {
   padding: 0 20px;
 }
+div.short-row {
+  padding: 5px 30px 15px 30px;
+}
 div.inline-row {
   margin-bottom: 15px;
   padding: 0 32px;
@@ -223,9 +255,11 @@ div.inline-row {
 }
 div.control-row {
   padding: 5px 0;
+  margin-bottom: 20px;
 }
-.card-custom {
+div.card-custom#app {
   margin: 15px auto;
+  height: 440px;
   width: 360px;
   max-width: 480px;
   min-width: 320px;

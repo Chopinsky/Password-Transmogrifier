@@ -44,7 +44,7 @@
             max="32"
             step="4"
             value="16"
-            v-model="pasLen"
+            v-model="passLen"
             v-on:change="onRangeChanged"
           >
         </p>
@@ -83,11 +83,7 @@
 
 <script>
 /* eslint-disable */
-const INPUT_KEY = "INPUT_KEY";
-const TO_SAVE_KEY = "TO_SAVE_KEY";
-const PASSWORD_LEN = "PASSWORD_LEN";
-const DEV_MODE = false;
-const DEFAULT_OUTPUT_LEN = 16;
+const DEFAULT_OUTPUT_LEN = 12;
 
 export default {
   name: "app",
@@ -99,37 +95,23 @@ export default {
     }
 
     this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
-    this.$store.loadDefault(data => {
+    this.$store.loadDefault(DEFAULT_OUTPUT_LEN, data => {
       if (data && data.input) {
+        this.input = data.input;
+        this.checked = data.checked;
+        this.passLen = data.passLen;
+
         this.setPassword(data.input, host);
         this.$algo.setOutputSize(data.passLen);
         this.$refs["input"].focus();
       }
-      });
-    } else if (typeof localStorage !== "undefined") {
-      setTimeout(() => {
-        if (localStorage[TO_SAVE_KEY] && localStorage[INPUT_KEY]) {
-          this.checked = true;
-          this.input = localStorage[INPUT_KEY];
-          this.pasLen = localStorage[PASSWORD_LEN] || DEFAULT_OUTPUT_LEN;
-          this.$algo.setOutputSize(this.pasLen);
-
-          if (this.input) {
-            this.setPassword(this.input, host);
-          }
-
-          this.$refs["input"].focus();
-        }
-      }, 0);
-    }
-
-    this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
+    });
 
     return {
       host,
       input: "",
       password: "",
-      pasLen: DEFAULT_OUTPUT_LEN,
+      passLen: DEFAULT_OUTPUT_LEN,
       checked: false
     };
   },
@@ -148,6 +130,8 @@ export default {
       if (this.password && this.$refs["textArea"]) {
         this.$refs["textArea"].select();
         document.execCommand("copy");
+
+        //todo: also store if not the same input
       }
     },
     unselect() {
@@ -167,19 +151,7 @@ export default {
       }
     },
     updateStore(val) {
-      if (DEV_MODE && chrome && chrome.storage) {
-        chrome.storage.sync.set({ INPUT_KEY: val }, function() {
-          console.log(`Settings {${key}: ${value}} is saved`);
-        });
-      } else if (typeof localStorage !== "undefined") {
-        if (this.checked) {
-          localStorage[INPUT_KEY] = val;
-          localStorage[TO_SAVE_KEY] = val ? true : false;
-        } else {
-          localStorage[INPUT_KEY] = "";
-          localStorage[TO_SAVE_KEY] = false;
-        }
-      }
+      this.$store.updateStore(val);
     },
     onInputChanged(event) {
       const currInput = event.target.value;

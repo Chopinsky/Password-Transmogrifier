@@ -98,20 +98,13 @@ export default {
       host = hostArray.slice(hostArray.length - 3).join(".");
     }
 
-    if (DEV_MODE && chrome && chrome.storage) {
-      chrome.storage.sync.get([INPUT_KEY, TO_SAVE_KEY], function(result) {
-        if (result[TO_SAVE_KEY]) {
-          this.checked = true;
-          this.input = result[INPUT_KEY];
-          this.pasLen = result[PASSWORD_LEN] || DEFAULT_OUTPUT_LEN;
-          this.$algo.setOutputSize(this.pasLen);
-
-          if (this.input) {
-            this.setPassword(this.input, host);
-          }
-
-          this.$refs["input"].focus();
-        }
+    this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
+    this.$store.loadDefault(data => {
+      if (data && data.input) {
+        this.setPassword(data.input, host);
+        this.$algo.setOutputSize(data.passLen);
+        this.$refs["input"].focus();
+      }
       });
     } else if (typeof localStorage !== "undefined") {
       setTimeout(() => {

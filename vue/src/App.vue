@@ -2,7 +2,7 @@
   <div id="app" class="card large card-custom">
     <div class="card-content">
       <div class="row title-row">
-        <span class="card-title grey-text text-darken-2">Pass . Made . Easy</span>
+        <span class="card-title grey-text text-darken-2">Password . Made . Easy</span>
       </div>
 
       <div class="row field-row">
@@ -15,7 +15,7 @@
             v-model="input"
             v-on:input="onInputChanged"
           >
-          <label for="hint">Hint Phrase</label>
+          <label for="hint">Pass-Phrase</label>
         </div>
         <div class="col s1">
           <a
@@ -26,28 +26,6 @@
             <i class="material-icons left icon">cancel</i>
           </a>
         </div>
-      </div>
-
-      <div class="row inline-row">
-        <label class="checkbox">
-          <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked">
-          <span>Save this Hint Phrase</span>
-        </label>
-      </div>
-
-      <div class="row short-row">
-        <p class="range-field">
-          <input
-            type="range"
-            id="pass-len"
-            min="12"
-            max="32"
-            step="4"
-            value="16"
-            v-model="passLen"
-            v-on:change="onRangeChanged"
-          >
-        </p>
       </div>
 
       <div class="row field-row">
@@ -77,13 +55,38 @@
           Copy to Clipboard
         </a>
       </div>
+
+      <div class="row short-row">
+        <label for="range" class="range-label">
+          Password Length:
+          <span class="range-data">{{passLen}}</span>
+        </label>
+        <p id="range">
+          <input
+            type="range"
+            id="pass-len"
+            min="12"
+            max="32"
+            step="4"
+            v-model="passLen"
+            v-on:change="onRangeChanged"
+          >
+        </p>
+      </div>
+
+      <div class="row inline-row">
+        <label class="checkbox">
+          <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked">
+          <span>Remember Pass-Phrase</span>
+        </label>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
-const DEFAULT_OUTPUT_LEN = 12;
+const DEFAULT_OUTPUT_LEN = 16;
 
 export default {
   name: "app",
@@ -151,7 +154,7 @@ export default {
       }
     },
     updateStore(val) {
-      this.$store.updateStore(val);
+      this.$store.updateStore(val, this.checked);
     },
     onInputChanged(event) {
       const currInput = event.target.value;
@@ -168,7 +171,15 @@ export default {
       this.checked = !this.checked;
       this.updateStore(this.input);
     },
-    onRangeChanged(event) {},
+    onRangeChanged(event) {
+      const currRange = event.target.value;
+      console.log(currRange);
+
+      this.$algo.setOutputSize(currRange);
+      if (this.input) {
+        this.setPassword(this.input);
+      }
+    },
     onCopyClick(event) {
       this.selectCopy();
       this.unselect();
@@ -211,23 +222,30 @@ div.field-row {
   padding: 0 20px;
 }
 div.short-row {
-  padding: 5px 30px 15px 30px;
+  padding: 5px 45px 15px 45px;
 }
 div.inline-row {
   margin-bottom: 15px;
-  padding: 0 32px;
+  padding: 0 45px;
   text-align: left;
 }
 div.control-row {
-  padding: 5px 0;
+  padding: 0 0 5px 0;
   margin-bottom: 20px;
 }
 div.card-custom#app {
   margin: 15px auto;
-  height: 440px;
+  height: 460px;
   width: 360px;
   max-width: 480px;
   min-width: 320px;
+}
+label.range-label {
+  font-size: 1em;
+}
+span.range-data {
+  font-weight: bold;
+  color: #1a237e;
 }
 .button {
   margin-top: 24px;

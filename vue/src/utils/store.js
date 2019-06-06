@@ -36,9 +36,9 @@ const loadDefault = (default_len, callback) => {
   }
 };
 
-const updateStore = val => {
+const updateStore = (val, checked) => {
   if (DEV_MODE && typeof Storage !== "undefined") {
-    if (this.checked) {
+    if (checked) {
       localStorage[INPUT_KEY] = val;
       localStorage[TO_SAVE_KEY] = val ? true : false;
     } else {

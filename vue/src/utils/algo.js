@@ -1,9 +1,9 @@
 import crypto from "crypto";
 
-const DEFAULT_LENGTH = 12;
+const MIN_LENGTH = 12;
 const MIN_CHAR_TYPE_COUNT = 2;
 
-let outputSize = DEFAULT_LENGTH;
+let outputSize = MIN_LENGTH;
 
 const hash = (content, host, encode) => {
   let ans = content;
@@ -24,7 +24,7 @@ const hash = (content, host, encode) => {
 };
 
 const setOutputSize = size => {
-  if (size >= DEFAULT_LENGTH) {
+  if (size >= MIN_LENGTH) {
     outputSize = size;
   }
 };

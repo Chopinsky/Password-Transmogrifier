@@ -14,8 +14,8 @@
             class="validate"
             v-model="input"
             v-on:input="onInputChanged"
-          >
-          <label for="hint">Pass-Phrase</label>
+          />
+          <label for="hint">hint phrase</label>
         </div>
         <div class="col s1">
           <a
@@ -25,6 +25,20 @@
           >
             <i class="material-icons left icon">cancel</i>
           </a>
+        </div>
+      </div>
+
+      <div class="row field-row">
+        <div class="input-field col s12">
+          <input
+            id="domain"
+            type="text"
+            ref="domain"
+            class="validate"
+            v-model="host"
+            v-on:input="onHostChanged"
+          />
+          <label for="domain">generated for (can't be empty)</label>
         </div>
       </div>
 
@@ -40,7 +54,7 @@
             v-on:focus="onTextAreaFocus"
             v-on:blur="onTextAreaBlur"
           />
-          <label for="password" v-bind:class="isActive">Generated Password</label>
+          <label for="password" v-bind:class="isActive">password</label>
         </div>
       </div>
 
@@ -58,7 +72,7 @@
 
       <div class="row short-row">
         <label for="range" class="range-label">
-          Password Length:
+          desired length:
           <span class="range-data">{{passLen}}</span>
         </label>
         <p id="range">
@@ -70,14 +84,14 @@
             step="4"
             v-model="passLen"
             v-on:change="onRangeChanged"
-          >
+          />
         </p>
       </div>
 
       <div class="row inline-row">
         <label class="checkbox">
-          <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked">
-          <span>Remember Pass-Phrase</span>
+          <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked" />
+          <span>auto fill for this site</span>
         </label>
       </div>
     </div>
@@ -91,11 +105,7 @@ const DEFAULT_OUTPUT_LEN = 16;
 export default {
   name: "app",
   data: function() {
-    let host = window.location.host || window.location.hostname;
-    let hostArray = host.split(".");
-    if (hostArray.length > 3) {
-      host = hostArray.slice(hostArray.length - 3).join(".");
-    }
+    let host = this.getHost();
 
     this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
     this.$store.loadDefault(DEFAULT_OUTPUT_LEN, data => {
@@ -119,10 +129,22 @@ export default {
     };
   },
   methods: {
+    getHost() {
+      const host = window.location.host || window.location.hostname;
+
+      const hostArray = host.split(".");
+      if (hostArray.length > 3) {
+        host = hostArray.slice(hostArray.length - 3).join(".");
+      }
+
+      return host;
+    },
     setPassword(password, host) {
       if (password) {
         let raw = this.$algo.hash(password, host || this.host);
         this.password = this.$algo.condense(raw);
+      } else {
+        this.password = "";
       }
 
       setTimeout(() => {
@@ -161,6 +183,17 @@ export default {
 
       this.setPassword(currInput);
       this.updateStore(currInput);
+    },
+    onHostChanged(event) {
+      const alteredHost = event.target.value;
+
+      if (!alteredHost) {
+        this.host = this.getHost();
+      }
+
+      if (this.input) {
+        this.setPassword(this.input);
+      }
     },
     onButtonClick(event) {
       this.input = "";
@@ -223,19 +256,21 @@ div.field-row {
 }
 div.short-row {
   padding: 5px 45px 15px 45px;
+  text-align: left;
 }
 div.inline-row {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  margin-top: -8px;
   padding: 0 45px;
   text-align: left;
 }
 div.control-row {
   padding: 0 0 5px 0;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 div.card-custom#app {
   margin: 15px auto;
-  height: 460px;
+  height: 540px;
   width: 360px;
   max-width: 480px;
   min-width: 320px;

@@ -2,7 +2,8 @@
   <div id="app" class="card large card-custom">
     <div class="card-content">
       <div class="row title-row">
-        <span class="card-title grey-text text-darken-2">Password . Made . Easy</span>
+        <span class="card-title grey-text text-darken-1">Craftsman</span>
+        <span class="grey-text">A Password Servant</span>
       </div>
 
       <div class="row field-row">
@@ -34,7 +35,7 @@
             id="domain"
             type="text"
             ref="domain"
-            class="validate"
+            class="active validate"
             v-model="host"
             v-on:input="onHostChanged"
           />
@@ -60,7 +61,7 @@
 
       <div class="row control-row">
         <a
-          class="waves-effect waves-light btn"
+          class="waves-effect waves-light btn long-btn"
           title="Copy the generated password to the clipboard"
           v-bind:disabled="!this.input"
           v-on:click="onCopyClick"
@@ -71,8 +72,8 @@
       </div>
 
       <div class="row short-row">
-        <label for="range" class="range-label">
-          desired length:
+        <label for="range" class="range-label alt-font">
+          password length:
           <span class="range-data">{{passLen}}</span>
         </label>
         <p id="range">
@@ -89,9 +90,9 @@
       </div>
 
       <div class="row inline-row">
-        <label class="checkbox">
+        <label class="checkbox alt-font">
           <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked" />
-          <span>auto fill for this site</span>
+          <span class>enable auto-fill next time</span>
         </label>
       </div>
     </div>
@@ -108,6 +109,7 @@ export default {
     let host = this.getHost();
 
     this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
+
     this.$store.loadDefault(DEFAULT_OUTPUT_LEN, data => {
       if (data && data.input) {
         this.input = data.input;
@@ -116,7 +118,6 @@ export default {
 
         this.setPassword(data.input, host);
         this.$algo.setOutputSize(data.passLen);
-        this.$refs["input"].focus();
       }
     });
 
@@ -127,6 +128,15 @@ export default {
       passLen: DEFAULT_OUTPUT_LEN,
       checked: false
     };
+  },
+  mounted: function() {
+    // make sure all input fields' labels are properly moved
+    M.updateTextFields();
+
+    // set initial focus to the input field
+    this.$nextTick(function() {
+      this.$refs["input"].focus();
+    });
   },
   methods: {
     getHost() {
@@ -234,7 +244,7 @@ export default {
 
 <style>
 body {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: monospace, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -249,7 +259,7 @@ div.row {
   padding-top: 0px;
 }
 div.title-row {
-  padding: 20px 0 10px 0;
+  padding: 8px 0 16px 0;
 }
 div.field-row {
   padding: 0 20px;
@@ -275,11 +285,17 @@ div.card-custom#app {
   max-width: 480px;
   min-width: 320px;
 }
+a.long-btn {
+  padding: 0 26px;
+}
+label.alt-font {
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
 label.range-label {
   font-size: 1em;
 }
 span.range-data {
-  font-weight: bold;
+  font-weight: 600;
   color: #1a237e;
 }
 .button {

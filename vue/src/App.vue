@@ -102,11 +102,16 @@
 <script>
 /* eslint-disable */
 const DEFAULT_OUTPUT_LEN = 16;
+const HOST_UNAVAILABLE = "<current page info unavailable>";
 
 export default {
   name: "app",
   data: function() {
-    let host = this.getHost();
+    this.getHost(host => {
+      if (host) {
+        this.host = host;
+      }
+    });
 
     this.$algo.setOutputSize(DEFAULT_OUTPUT_LEN);
 
@@ -122,7 +127,8 @@ export default {
     });
 
     return {
-      host,
+      host:
+        window.location.host || window.location.hostname || HOST_UNAVAILABLE,
       input: "",
       password: "",
       passLen: DEFAULT_OUTPUT_LEN,
@@ -139,15 +145,28 @@ export default {
     });
   },
   methods: {
-    getHost() {
-      const host = window.location.host || window.location.hostname;
+    getHost(cb) {
+      if (chrome && chrome.tabs) {
+        const query = {
+          active: true,
+          lastFocusedWindow: true
+        };
 
-      const hostArray = host.split(".");
-      if (hostArray.length > 3) {
-        host = hostArray.slice(hostArray.length - 3).join(".");
+        chrome.tabs.query(query, tabs => {
+          let host = tabs[0].url;
+          let raw = host.split("/");
+
+          for (const val of raw) {
+            if (val && !val.endsWith(":")) {
+              let ary = val.split(".");
+              host = ary.slice(ary.length > 3 ? ary.length - 3 : 0).join(".");
+              break;
+            }
+          }
+
+          cb(host);
+        });
       }
-
-      return host;
     },
     setPassword(password, host) {
       if (password) {

@@ -5,13 +5,17 @@ const MIN_CHAR_TYPE_COUNT = 2;
 
 let outputSize = MIN_LENGTH;
 
-const hash = (content, host, encode) => {
+const hash = (content, host, user, encode) => {
   let ans = content;
 
   if (crypto) {
     const h = crypto.createHash("sha256");
     h.update(content);
     h.update(host);
+
+    if (user) {
+      h.update(user);
+    }
 
     if (!encode) {
       ans = h.digest().toString("base64");

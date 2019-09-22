@@ -1,12 +1,17 @@
 {
-  "name": "PassMadeEasy",
-  "short_name": "PassMadeEasy",
-  "version": "0.1.0",
-  "description": "This extension will let you transmogrify your weak, often times shared, password into more sophiscated and site-unique ones",
+  "name": "Craftsman - A Password Servant",
+  "short_name": "Craftsman",
+  "version": "0.1.1",
+  "description": "An extension to assist you craft and regenerate site-specific strong passwords with ease.",
   "browser_action": {
     "default_popup": "index.html",
-    "default_title": "Password made easy"
+    "default_title": "Craftsman - A Password Servant"
   },
-  "permissions": ["activeTab", "storage", "clipboardWrite"],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": ["identity", "tabs", "storage", "clipboardWrite"],
   "manifest_version": 2
 }

@@ -2,7 +2,7 @@
   <div id="app" class="card large card-custom">
     <div class="card-content">
       <div class="row title-row">
-        <span class="card-title grey-text text-darken-1">Craftsman</span>
+        <span class="card-title grey-text text-darken-1" style="margin-bottom: 0;">Craftsman</span>
         <span class="grey-text">A Password Servant</span>
       </div>
 
@@ -21,7 +21,7 @@
         <div class="col s1">
           <a
             class="waves-effect waves-teal btn-flat button"
-            title="Clear entrance"
+            title="Clear this hint phrase"
             v-on:click="onButtonClick"
           >
             <i class="material-icons left icon">cancel</i>
@@ -39,9 +39,11 @@
             v-model="host"
             v-on:input="onHostChanged"
           />
-          <label for="domain">generated for (can't be empty)</label>
+          <label for="domain">for site (can't left empty)</label>
         </div>
       </div>
+
+      <!-- TODO: for user -> chrome.identity.getProfileUserInfo(function callback) -->
 
       <div class="row field-row">
         <div class="input-field col s12">
@@ -55,7 +57,7 @@
             v-on:focus="onTextAreaFocus"
             v-on:blur="onTextAreaBlur"
           />
-          <label for="password" v-bind:class="isActive">password</label>
+          <label for="password" v-bind:class="isActive">crafted password</label>
         </div>
       </div>
 
@@ -73,7 +75,7 @@
 
       <div class="row short-row">
         <label for="range" class="range-label alt-font">
-          password length:
+          with password length:
           <span class="range-data">{{passLen}}</span>
         </label>
         <p id="range">
@@ -92,7 +94,7 @@
       <div class="row inline-row">
         <label class="checkbox alt-font">
           <input type="checkbox" v-bind:checked="this.checked" v-on:click="onCheckboxClicked" />
-          <span class>enable auto-fill next time</span>
+          <span class>save this hint phrase for all</span>
         </label>
       </div>
     </div>

@@ -2,6 +2,9 @@ import crypto from "crypto";
 
 const MIN_LENGTH = 12;
 const MIN_CHAR_TYPE_COUNT = 2;
+const MOD = 34;
+const OFFSET = 93;
+const ENCODE = "ascii";
 
 let outputSize = MIN_LENGTH;
 
@@ -27,6 +30,44 @@ const hash = (content, host, user, encode) => {
   return ans;
 };
 
+const hash2 = (content, host, user) => {
+  let ans = content;
+
+  if (crypto) {
+    const h = crypto.createHash("sha256");
+    h.update(content);
+    h.update(host);
+
+    if (user) {
+      h.update(user);
+    }
+
+    ans = h.digest();
+  }
+
+  return transform(ans.toString(ENCODE));
+};
+
+const transform = buf => {
+  if (!buf || buf.length === 0) {
+    return buf.toString();
+  }
+
+  let res = "";
+  for (let i = 0; i < buf.length; i++) {
+    let code = buf.charCodeAt(i);
+
+    if (code < 33 || code > 126) {
+      code %= MOD;
+      code += OFFSET;
+    }
+
+    res += String.fromCharCode(code);
+  }
+
+  return res;
+};
+
 const setOutputSize = size => {
   if (size >= MIN_LENGTH) {
     outputSize = size;
@@ -44,6 +85,8 @@ const condense = password => {
 
   let doneCount = 0;
   let pos = new Array(4);
+
+  //TODO: trim the longest arraies to match the final length requirements
 
   for (let i = 0; i < password.length; i++) {
     let ch = password.charCodeAt(i);
@@ -165,7 +208,7 @@ export default {
   install: function(Vue) {
     // Do stuff
     Object.defineProperty(Vue.prototype, "$algo", {
-      value: { condense, hash, setOutputSize }
+      value: { condense, hash, hash2, setOutputSize }
     });
   }
 };

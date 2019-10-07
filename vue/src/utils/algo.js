@@ -1,7 +1,6 @@
 import crypto from "crypto";
 
 const MIN_LENGTH = 12;
-const MIN_CHAR_TYPE_COUNT = 2;
 const MOD = 34;
 const OFFSET = 93;
 const ENCODE = "ascii";
@@ -83,8 +82,7 @@ const condense = password => {
     return password;
   }
 
-  let doneCount = 0;
-  let pos = new Array(4);
+  let pos = [[], [], [], []];
 
   //TODO: trim the longest arraies to match the final length requirements
 
@@ -93,65 +91,25 @@ const condense = password => {
 
     if (ch >= 48 && ch <= 57) {
       // a number
-      if (!pos[0]) {
-        pos[0] = [i];
-        doneCount++;
-      } else if (pos[0].length < MIN_CHAR_TYPE_COUNT) {
-        pos[0].push(i);
-        doneCount++;
-      }
+      pos[0].push(i);
     } else if (ch >= 65 && ch <= 90) {
       // a upper case
-      if (!pos[1]) {
-        pos[1] = [i];
-        doneCount++;
-      } else if (pos[1].length < MIN_CHAR_TYPE_COUNT) {
-        pos[1].push(i);
-        doneCount++;
-      }
+      pos[1].push(i);
     } else if (ch >= 97 && ch <= 122) {
       // a lower case
-      if (!pos[2]) {
-        pos[2] = [i];
-        doneCount++;
-      } else if (pos[2].length < MIN_CHAR_TYPE_COUNT) {
-        pos[2].push(i);
-        doneCount++;
-      }
+      pos[2].push(i);
     } else {
       // a symbol
-      if (!pos[3]) {
-        pos[3] = [i];
-        doneCount++;
-      } else if (pos[3].length < MIN_CHAR_TYPE_COUNT) {
-        pos[3].push(i);
-        doneCount++;
-      }
-    }
-
-    if (doneCount === 4 * MIN_CHAR_TYPE_COUNT) {
-      break;
+      pos[3].push(i);
     }
   }
 
-  if (!pos[3] || pos[3].length === 0) {
-    // replace with symbols
-    let transform = -1;
-    for (let i = 1; i < 3; i++) {
-      if (pos[i] && pos[i].length > 1) {
-        transform = pos[i].pop();
-        break;
-      }
-    }
+  if (pos[0].length === 0) {
+    password = update(password, pos, true);
+  }
 
-    if (transform >= 0) {
-      let newChar = mapChar(password.charCodeAt(transform));
-      pos[3] = [transform];
-      password =
-        password.substring(0, transform) +
-        newChar +
-        password.substring(transform + 1);
-    }
+  if (pos[3].length === 0) {
+    password = update(password, pos, false);
   }
 
   pos = pos.flat();
@@ -187,9 +145,39 @@ const condense = password => {
   return final.join("");
 };
 
-const mapChar = charCode => {
+const update = (password, pos, isNum) => {
+  // replace with symbols
+  let loc;
+  let newChar;
+
+  if (pos[1].length > pos[2].length) {
+    loc = pos[1].pop();
+  } else {
+    loc = pos[2].pop();
+  }
+
+  if (isNum) {
+    // to number
+    newChar = mapCharToNum(password.charCodeAt(loc));
+    pos[0] = [loc];
+  } else {
+    // to symbol
+    newChar = mapCharToSym(password.charCodeAt(loc));
+    pos[3] = [loc];
+  }
+
+  password = password.substring(0, loc) + newChar + password.substring(loc + 1);
+
+  return password;
+};
+
+const mapCharToNum = charCode => {
+  return String.fromCharCode((charCode % 10) + 48);
+};
+
+const mapCharToSym = charCode => {
   let pos = charCode % 32;
-  let result = charCode;
+  let result;
 
   if (pos < 15) {
     result = pos + 33;

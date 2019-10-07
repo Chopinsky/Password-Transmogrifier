@@ -78,13 +78,7 @@ const condense = password => {
     return "";
   }
 
-  if (password.length <= outputSize) {
-    return password;
-  }
-
   let pos = [[], [], [], []];
-
-  //TODO: trim the longest arraies to match the final length requirements
 
   for (let i = 0; i < password.length; i++) {
     let ch = password.charCodeAt(i);
@@ -112,34 +106,23 @@ const condense = password => {
     password = update(password, pos, false);
   }
 
-  pos = pos.flat();
-  let final = new Array(outputSize);
-
-  for (let loc of pos) {
-    let count = 0;
-    let idx = loc;
-
-    do {
-      // keep shifting to the next available pos for the
-      // chars
-      idx = (loc + count++) % outputSize;
-    } while (final[idx]);
-
-    final[idx] = password.charAt(loc);
+  if (password.length <= outputSize) {
+    return password;
   }
 
-  let lastCh = "";
-  for (let i = 0; i < outputSize; i++) {
-    if (final[i]) {
-      continue;
+  let final = new Array(password.length);
+  let count = 0;
+  let curr = 0;
+  let idx;
+
+  while (count < outputSize) {
+    if (pos[curr].length > 0) {
+      idx = pos[curr].pop();
+      final[idx] = password.charAt(idx);
+      count++; 
     }
 
-    final[i] = password.charAt(i);
-    if (final[i] === lastCh) {
-      final[i] = password.charAt(outputSize - i - 1);
-    }
-
-    lastCh = final[i];
+    curr = (curr + 1) % 4;
   }
 
   return final.join("");
